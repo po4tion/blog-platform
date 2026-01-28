@@ -1,5 +1,5 @@
 // Re-export database types
-export type { Database, Tables, InsertTables, UpdateTables, Functions } from './database.types'
+export type { Database, Tables, TablesInsert, TablesUpdate } from './database.types'
 
 // User/Profile types
 export interface Profile {
