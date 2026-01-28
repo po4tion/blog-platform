@@ -1,7 +1,29 @@
 {
   "name": "blog-platform",
   "version": "0.1.0",
+  "description": "프로덕션 수준의 웹 기반 블로그 플랫폼",
+  "author": "po4tion <po4tion0429@gmail.com>",
+  "license": "MIT",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/po4tion/blog-platform.git"
+  },
+  "homepage": "https://github.com/po4tion/blog-platform",
+  "bugs": {
+    "url": "https://github.com/po4tion/blog-platform/issues"
+  },
+  "keywords": [
+    "blog",
+    "next.js",
+    "react",
+    "supabase",
+    "typescript",
+    "tailwindcss"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
