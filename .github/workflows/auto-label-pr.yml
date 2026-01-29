@@ -28,30 +28,30 @@ jobs:
 
             const labelMap = {
               'feat': 'feat',
-              'fix': 'bug',
-              'docs': 'documentation',
+              'fix': 'fix',
+              'docs': 'docs',
               'style': 'style',
               'refactor': 'refactor',
-              'perf': 'performance',
+              'perf': 'perf',
               'test': 'test',
               'chore': 'chore',
               'hotfix': 'hotfix',
-              'ui': 'UI/UX',
+              'ui': 'ui',
               'security': 'security',
               'release': 'release'
             };
 
             const emojiMap = {
               '✨': 'feat',
-              '🐛': 'bug',
-              '📚': 'documentation',
+              '🐛': 'fix',
+              '📚': 'docs',
               '💎': 'style',
               '♻️': 'refactor',
-              '⚡': 'performance',
+              '⚡': 'perf',
               '✅': 'test',
               '🔧': 'chore',
               '🚨': 'hotfix',
-              '🎨': 'UI/UX',
+              '🎨': 'ui',
               '🔐': 'security',
               '🚀': 'release'
             };
