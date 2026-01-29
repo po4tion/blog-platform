@@ -1,10 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { SearchIcon, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   Dialog,
   DialogContent,
@@ -12,6 +8,10 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { SearchIcon, X } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useState } from 'react'
 
 export function MobileSearch() {
   const [open, setOpen] = useState(false)
@@ -51,13 +51,8 @@ export function MobileSearch() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden"
-          aria-label="검색"
-        >
-          <SearchIcon className="h-5 w-5" />
+        <Button variant="ghost" size="icon" className="size-11 md:hidden" aria-label="검색">
+          <SearchIcon className="size-6" />
         </Button>
       </DialogTrigger>
       <DialogContent className="top-[10%] translate-y-0 sm:max-w-md">
@@ -73,7 +68,7 @@ export function MobileSearch() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="pl-9 pr-9"
+              className="pr-9 pl-9"
               autoFocus
             />
             {query && (
