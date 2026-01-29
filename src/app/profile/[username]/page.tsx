@@ -1,9 +1,7 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 import { PostCard } from '@/components/post/post-card'
 
 interface ProfilePageProps {
@@ -108,12 +106,6 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         {profile.bio && <p className="mt-4 max-w-md">{profile.bio}</p>}
 
         <p className="text-muted-foreground mt-4 text-sm">{joinDate} 가입</p>
-
-        {isOwnProfile && (
-          <Button asChild variant="outline" className="mt-4">
-            <Link href="/settings/profile">프로필 편집</Link>
-          </Button>
-        )}
       </article>
 
       <section className="mt-12">
