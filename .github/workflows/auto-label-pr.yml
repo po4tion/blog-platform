@@ -27,7 +27,7 @@ jobs:
             console.log(`Found ${commits.length} commits in PR`);
 
             const labelMap = {
-              'feat': 'feature',
+              'feat': 'feat',
               'fix': 'bug',
               'docs': 'documentation',
               'style': 'style',
@@ -42,7 +42,7 @@ jobs:
             };
 
             const emojiMap = {
-              '✨': 'feature',
+              '✨': 'feat',
               '🐛': 'bug',
               '📚': 'documentation',
               '💎': 'style',
