@@ -291,20 +291,18 @@ export default async function PostPage({ params }: PostPageProps) {
               )}
             </div>
           )}
+
+          {post.published && (
+            <CommentList
+              postId={post.id}
+              initialComments={comments}
+              currentUser={currentUserProfile}
+            />
+          )}
         </article>
 
         {post.content && <TableOfContents content={post.content} />}
       </div>
-
-      {post.published && (
-        <div className="max-w-4xl mx-auto">
-          <CommentList
-            postId={post.id}
-            initialComments={comments}
-            currentUser={currentUserProfile}
-          />
-        </div>
-      )}
     </main>
   )
 }
