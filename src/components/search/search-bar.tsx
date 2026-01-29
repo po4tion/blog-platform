@@ -43,6 +43,11 @@ export function SearchBar({ placeholder = '글 검색...' }: SearchBarProps) {
   }, [searchParams, router])
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // 한글 IME 조합 중에는 무시
+    if (e.nativeEvent.isComposing) {
+      return
+    }
+
     if (e.key === 'Enter') {
       handleSearch()
     }
