@@ -9,6 +9,16 @@ export async function Header() {
     data: { user },
   } = await supabase.auth.getUser()
 
+  let profile = null
+  if (user) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('username, display_name, avatar_url')
+      .eq('id', user.id)
+      .single()
+    profile = data
+  }
+
   return (
     <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur">
       <nav className="container flex h-14 items-center justify-between">
@@ -17,8 +27,8 @@ export async function Header() {
         </Link>
 
         <div className="flex items-center gap-4">
-          {user ? (
-            <UserMenu user={user} />
+          {user && profile ? (
+            <UserMenu user={user} profile={profile} />
           ) : (
             <Button asChild variant="default" size="sm">
               <Link href="/login">로그인</Link>
