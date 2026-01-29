@@ -28,7 +28,12 @@ export async function Header() {
 
         <div className="flex items-center gap-4">
           {user && profile ? (
-            <UserMenu user={user} profile={profile} />
+            <>
+              <Button asChild variant="outline" size="sm">
+                <Link href="/posts/new">글쓰기</Link>
+              </Button>
+              <UserMenu user={user} profile={profile} />
+            </>
           ) : (
             <Button asChild variant="default" size="sm">
               <Link href="/login">로그인</Link>
