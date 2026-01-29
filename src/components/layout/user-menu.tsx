@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import type { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -15,25 +16,30 @@ import { Button } from '@/components/ui/button'
 
 interface UserMenuProps {
   user: User
+  profile: {
+    username: string
+    display_name: string | null
+    avatar_url: string | null
+  }
 }
 
-export function UserMenu({ user }: UserMenuProps) {
+export function UserMenu({ user, profile }: UserMenuProps) {
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
     window.location.href = '/'
   }
 
-  const displayName = user.user_metadata?.full_name || user.user_metadata?.name || user.email
-  const avatarUrl = user.user_metadata?.avatar_url
-  const initials = displayName?.slice(0, 2).toUpperCase() || '??'
+  const displayName = profile.display_name || profile.username
+  const avatarUrl = profile.avatar_url
+  const initials = displayName.slice(0, 2).toUpperCase()
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={avatarUrl} alt={displayName || '사용자'} />
+            <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
@@ -45,6 +51,13 @@ export function UserMenu({ user }: UserMenuProps) {
             <p className="text-muted-foreground text-xs leading-none">{user.email}</p>
           </div>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href={`/profile/${profile.username}`}>내 프로필</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/settings/profile">프로필 설정</Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
           로그아웃
