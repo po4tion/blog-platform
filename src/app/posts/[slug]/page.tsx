@@ -7,6 +7,7 @@ import type { CommentWithAuthor, Profile } from '@/types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { PostContent } from '@/components/post/post-content'
 import { PostActions } from '@/components/post/post-actions'
+import { LikeButton } from '@/components/post/like-button'
 import { CommentList } from '@/components/comment/comment-list'
 
 interface PostPageProps {
@@ -133,6 +134,23 @@ export default async function PostPage({ params }: PostPageProps) {
     currentUserProfile = profileData
   }
 
+  // Fetch like count and user's like status
+  const { count: likesCount } = await supabase
+    .from('likes')
+    .select('*', { count: 'exact', head: true })
+    .eq('post_id', post.id)
+
+  let isLikedByUser = false
+  if (user) {
+    const { data: likeData } = await supabase
+      .from('likes')
+      .select('user_id')
+      .eq('post_id', post.id)
+      .eq('user_id', user.id)
+      .single()
+    isLikedByUser = !!likeData
+  }
+
   const author = post.profiles as unknown as {
     id: string
     username: string
@@ -197,6 +215,17 @@ export default async function PostPage({ params }: PostPageProps) {
         </header>
 
         <PostContent content={post.content} />
+
+        {post.published && (
+          <div className="mt-8 flex items-center gap-4 border-t pt-6">
+            <LikeButton
+              postId={post.id}
+              initialLiked={isLikedByUser}
+              initialCount={likesCount ?? 0}
+              isAuthenticated={!!user}
+            />
+          </div>
+        )}
       </article>
 
       {post.published && (
