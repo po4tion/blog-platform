@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { UserMenu } from '@/components/layout/user-menu'
 import { MobileNav } from '@/components/layout/mobile-nav'
+import { MobileSearch } from '@/components/search/mobile-search'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 export async function Header() {
@@ -31,6 +32,12 @@ export async function Header() {
           </Link>
         </div>
 
+        {/* Mobile actions */}
+        <div className="flex items-center gap-1 md:hidden">
+          <MobileSearch />
+        </div>
+
+        {/* Desktop navigation */}
         <div className="hidden items-center gap-2 md:flex">
           <ThemeToggle />
           {user && profile ? (
