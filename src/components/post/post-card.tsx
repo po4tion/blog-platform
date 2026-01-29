@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { Heart } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardFooter, CardHeader } from '@/components/ui/card'
 
@@ -70,7 +71,13 @@ export function PostCard({ post }: PostCardProps) {
           <span className="text-sm">{displayName}</span>
         </Link>
 
-        <div className="text-muted-foreground flex items-center gap-2 text-xs">
+        <div className="text-muted-foreground flex items-center gap-3 text-xs">
+          {post.likes_count > 0 && (
+            <span className="flex items-center gap-1">
+              <Heart className="h-3 w-3" />
+              {post.likes_count}
+            </span>
+          )}
           {publishedDate && <span>{publishedDate}</span>}
         </div>
       </CardFooter>
