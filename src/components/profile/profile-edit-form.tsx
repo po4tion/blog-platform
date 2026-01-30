@@ -71,50 +71,120 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Avatar className="h-20 w-20">
+      {/* 아바타 섹션 */}
+      <div className="flex flex-col items-center gap-3 pb-6 border-b border-border/50">
+        <Avatar className="h-20 w-20 ring-2 ring-border/50 ring-offset-2 ring-offset-background">
           <AvatarImage src={profile.avatar_url ?? undefined} alt={profile.username} />
-          <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+          <AvatarFallback className="text-lg font-medium">{initials}</AvatarFallback>
         </Avatar>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-xs text-muted-foreground text-center">
           프로필 이미지는 GitHub 계정의 아바타를 사용합니다
         </p>
       </div>
 
+      {/* 사용자명 */}
       <div className="space-y-2">
-        <Label htmlFor="username">사용자명</Label>
-        <Input id="username" placeholder="username" {...register('username')} />
-        {errors.username && <p className="text-destructive text-sm">{errors.username.message}</p>}
-        <p className="text-muted-foreground text-xs">
-          프로필 URL: blog-platform.com/@{profile.username}
+        <Label htmlFor="username" className="text-sm font-medium">
+          사용자명
+        </Label>
+        <Input
+          id="username"
+          placeholder="username"
+          className="transition-all focus:ring-2 focus:ring-primary/20"
+          {...register('username')}
+        />
+        {errors.username && (
+          <p className="text-xs text-destructive">{errors.username.message}</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          프로필 URL: /@{profile.username}
         </p>
       </div>
 
+      {/* 표시 이름 */}
       <div className="space-y-2">
-        <Label htmlFor="display_name">표시 이름</Label>
-        <Input id="display_name" placeholder="홍길동" {...register('display_name')} />
+        <Label htmlFor="display_name" className="text-sm font-medium">
+          표시 이름
+        </Label>
+        <Input
+          id="display_name"
+          placeholder="홍길동"
+          className="transition-all focus:ring-2 focus:ring-primary/20"
+          {...register('display_name')}
+        />
         {errors.display_name && (
-          <p className="text-destructive text-sm">{errors.display_name.message}</p>
+          <p className="text-xs text-destructive">{errors.display_name.message}</p>
         )}
       </div>
 
+      {/* 소개 */}
       <div className="space-y-2">
-        <Label htmlFor="bio">소개</Label>
-        <Textarea id="bio" placeholder="자기소개를 입력하세요" rows={4} {...register('bio')} />
-        {errors.bio && <p className="text-destructive text-sm">{errors.bio.message}</p>}
+        <Label htmlFor="bio" className="text-sm font-medium">
+          소개
+        </Label>
+        <Textarea
+          id="bio"
+          placeholder="자기소개를 입력하세요"
+          rows={4}
+          className="resize-none transition-all focus:ring-2 focus:ring-primary/20"
+          {...register('bio')}
+        />
+        {errors.bio && <p className="text-xs text-destructive">{errors.bio.message}</p>}
       </div>
 
+      {/* 메시지 */}
       {message && (
-        <p
-          className={`text-sm ${message.type === 'success' ? 'text-green-600' : 'text-destructive'}`}
+        <div
+          className={`rounded-lg px-4 py-3 text-center text-sm ${
+            message.type === 'success'
+              ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+              : 'bg-destructive/10 text-destructive'
+          }`}
         >
           {message.text}
-        </p>
+        </div>
       )}
 
-      <Button type="submit" disabled={isLoading}>
-        {isLoading ? '저장 중...' : '저장'}
+      {/* 저장 버튼 */}
+      <Button
+        type="submit"
+        disabled={isLoading}
+        className="w-full font-medium transition-all hover:scale-[1.02] active:scale-[0.98]"
+      >
+        {isLoading ? (
+          <>
+            <LoadingSpinner className="mr-2 h-4 w-4" />
+            저장 중...
+          </>
+        ) : (
+          '변경사항 저장'
+        )}
       </Button>
     </form>
+  )
+}
+
+function LoadingSpinner({ className }: { className?: string }) {
+  return (
+    <svg
+      className={`animate-spin ${className}`}
+      fill="none"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </svg>
   )
 }
