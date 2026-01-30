@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Github, Linkedin, Globe } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { profileSchema, type ProfileFormData } from '@/lib/validations/profile'
 import { Button } from '@/components/ui/button'
@@ -18,6 +19,9 @@ interface ProfileEditFormProps {
     display_name: string | null
     bio: string | null
     avatar_url: string | null
+    github_url: string | null
+    linkedin_url: string | null
+    website_url: string | null
   }
 }
 
@@ -35,6 +39,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
       username: profile.username,
       display_name: profile.display_name ?? '',
       bio: profile.bio ?? '',
+      github_url: profile.github_url ?? '',
+      linkedin_url: profile.linkedin_url ?? '',
+      website_url: profile.website_url ?? '',
     },
   })
 
@@ -50,6 +57,9 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
         username: data.username,
         display_name: data.display_name || null,
         bio: data.bio || null,
+        github_url: data.github_url || null,
+        linkedin_url: data.linkedin_url || null,
+        website_url: data.website_url || null,
       })
       .eq('id', profile.id)
 
@@ -130,6 +140,65 @@ export function ProfileEditForm({ profile }: ProfileEditFormProps) {
           {...register('bio')}
         />
         {errors.bio && <p className="text-xs text-destructive">{errors.bio.message}</p>}
+      </div>
+
+      {/* 소셜 링크 */}
+      <div className="space-y-4 pt-4 border-t border-border/50">
+        <p className="text-sm font-medium">소셜 링크</p>
+
+        {/* GitHub */}
+        <div className="space-y-2">
+          <Label htmlFor="github_url" className="text-sm font-medium flex items-center gap-2">
+            <Github className="h-4 w-4" />
+            GitHub
+          </Label>
+          <Input
+            id="github_url"
+            type="url"
+            placeholder="https://github.com/username"
+            className="transition-all focus:ring-2 focus:ring-primary/20"
+            {...register('github_url')}
+          />
+          {errors.github_url && (
+            <p className="text-xs text-destructive">{errors.github_url.message}</p>
+          )}
+        </div>
+
+        {/* LinkedIn */}
+        <div className="space-y-2">
+          <Label htmlFor="linkedin_url" className="text-sm font-medium flex items-center gap-2">
+            <Linkedin className="h-4 w-4" />
+            LinkedIn
+          </Label>
+          <Input
+            id="linkedin_url"
+            type="url"
+            placeholder="https://linkedin.com/in/username"
+            className="transition-all focus:ring-2 focus:ring-primary/20"
+            {...register('linkedin_url')}
+          />
+          {errors.linkedin_url && (
+            <p className="text-xs text-destructive">{errors.linkedin_url.message}</p>
+          )}
+        </div>
+
+        {/* Website */}
+        <div className="space-y-2">
+          <Label htmlFor="website_url" className="text-sm font-medium flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            웹사이트
+          </Label>
+          <Input
+            id="website_url"
+            type="url"
+            placeholder="https://example.com"
+            className="transition-all focus:ring-2 focus:ring-primary/20"
+            {...register('website_url')}
+          />
+          {errors.website_url && (
+            <p className="text-xs text-destructive">{errors.website_url.message}</p>
+          )}
+        </div>
       </div>
 
       {/* 메시지 */}

@@ -1,7 +1,9 @@
 import { ProfilePostList } from '@/components/profile/profile-post-list'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/server'
+import { Github, Linkedin, Globe } from 'lucide-react'
 import { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 interface ProfilePageProps {
@@ -61,7 +63,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, username, display_name, bio, avatar_url, created_at')
+    .select('id, username, display_name, bio, avatar_url, created_at, github_url, linkedin_url, website_url')
     .eq('username', username)
     .single()
 
@@ -108,6 +110,45 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         <p className="text-muted-foreground">@{profile.username}</p>
 
         {profile.bio && <p className="mt-4 max-w-md">{profile.bio}</p>}
+
+        {/* 소셜 링크 */}
+        {(profile.github_url || profile.linkedin_url || profile.website_url) && (
+          <div className="mt-4 flex items-center gap-3">
+            {profile.github_url && (
+              <Link
+                href={profile.github_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+                aria-label="GitHub"
+              >
+                <Github className="h-5 w-5" />
+              </Link>
+            )}
+            {profile.linkedin_url && (
+              <Link
+                href={profile.linkedin_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="h-5 w-5" />
+              </Link>
+            )}
+            {profile.website_url && (
+              <Link
+                href={profile.website_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+                aria-label="웹사이트"
+              >
+                <Globe className="h-5 w-5" />
+              </Link>
+            )}
+          </div>
+        )}
 
         <p className="text-muted-foreground mt-4 text-sm">{joinDate} 가입</p>
       </article>

@@ -1,5 +1,11 @@
 import { z } from 'zod'
 
+const urlSchema = z
+  .string()
+  .url('올바른 URL 형식이 아닙니다')
+  .optional()
+  .or(z.literal(''))
+
 export const profileSchema = z.object({
   username: z
     .string()
@@ -8,6 +14,9 @@ export const profileSchema = z.object({
     .regex(/^[a-zA-Z0-9_-]+$/, '영문, 숫자, 언더스코어(_), 하이픈(-)만 사용 가능합니다'),
   display_name: z.string().max(50, '표시 이름은 50자 이하여야 합니다').optional().or(z.literal('')),
   bio: z.string().max(500, '소개는 500자 이하여야 합니다').optional().or(z.literal('')),
+  github_url: urlSchema,
+  linkedin_url: urlSchema,
+  website_url: urlSchema,
 })
 
 export type ProfileFormData = z.infer<typeof profileSchema>

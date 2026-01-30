@@ -21,9 +21,13 @@ export default async function ProfileSettingsPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id, username, display_name, bio, avatar_url')
+    .select('id, username, display_name, bio, avatar_url, github_url, linkedin_url, website_url')
     .eq('id', user.id)
     .single()
+
+  // GitHub OAuth에서 가져온 username으로 기본 GitHub URL 설정
+  const githubUsername = user.user_metadata?.user_name
+  const defaultGithubUrl = githubUsername ? `https://github.com/${githubUsername}` : null
 
   if (!profile) {
     redirect('/')
@@ -59,7 +63,12 @@ export default async function ProfileSettingsPage() {
 
       {/* 설정 카드 */}
       <section className="rounded-2xl border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm md:p-8">
-        <ProfileEditForm profile={profile} />
+        <ProfileEditForm
+          profile={{
+            ...profile,
+            github_url: profile.github_url ?? defaultGithubUrl,
+          }}
+        />
       </section>
     </main>
   )
