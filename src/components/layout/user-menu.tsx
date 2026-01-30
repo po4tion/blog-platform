@@ -22,9 +22,10 @@ interface UserMenuProps {
     display_name: string | null
     avatar_url: string | null
   }
+  className?: string
 }
 
-export function UserMenu({ user, profile }: UserMenuProps) {
+export function UserMenu({ user, profile, className }: UserMenuProps) {
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -43,7 +44,7 @@ export function UserMenu({ user, profile }: UserMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="relative h-9 w-9 rounded-full ring-2 ring-transparent transition-all hover:ring-border/50"
+          className={`relative h-9 w-9 rounded-full ring-2 ring-transparent transition-all hover:ring-border/50 ${className || ''}`}
         >
           <Avatar className="h-9 w-9">
             <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />

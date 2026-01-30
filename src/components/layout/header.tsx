@@ -87,8 +87,7 @@ export async function Header() {
                   <span className="sr-only">글쓰기</span>
                 </Link>
               </Button>
-              <div className="mx-1 h-5 w-px bg-border/50" />
-              <UserMenu user={user} profile={profile} />
+              <UserMenu user={user} profile={profile} className="ml-3" />
             </>
           ) : (
             <Button
