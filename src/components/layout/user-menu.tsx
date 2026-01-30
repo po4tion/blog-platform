@@ -51,7 +51,9 @@ export function UserMenu({ user, profile, className, showTitle = false }: UserMe
           </Avatar>
           {showTitle && (
             <span className="hidden text-lg font-semibold tracking-tight text-heading transition-opacity hover:opacity-80 sm:inline-block">
-              loggu
+              {profile.username}
+              <span className="text-3xl leading-none text-muted-foreground">.</span>
+              <span className="text-muted-foreground">loggu</span>
             </span>
           )}
         </button>
