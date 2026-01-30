@@ -59,7 +59,7 @@ export async function Header() {
         </div>
 
         {/* Desktop navigation */}
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-2 md:flex">
           <ThemeToggle />
           {user && profile ? (
             <>
@@ -87,6 +87,7 @@ export async function Header() {
                   <span className="sr-only">글쓰기</span>
                 </Link>
               </Button>
+              <div className="mx-1 h-5 w-px bg-border/50" />
               <UserMenu user={user} profile={profile} />
             </>
           ) : (
