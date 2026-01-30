@@ -77,7 +77,11 @@ export function MobileNav({ user, profile, ownerProfile }: MobileNavProps) {
               <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
               <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
             </Avatar>
-            <span className="font-semibold">loggu</span>
+            <span className="font-semibold">
+              {displayProfile?.username}
+              <span className="text-2xl leading-none text-muted-foreground">.</span>
+              <span className="text-muted-foreground">loggu</span>
+            </span>
           </SheetTitle>
         </SheetHeader>
 
