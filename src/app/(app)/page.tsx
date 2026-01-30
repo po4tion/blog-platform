@@ -25,5 +25,5 @@ export default async function HomePage() {
   }
 
   // 프로필이 없는 경우 설정 페이지로
-  redirect('/settings/profile')
+  redirect('/settings/loggu')
 }

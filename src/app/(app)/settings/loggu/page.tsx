@@ -16,7 +16,7 @@ export default async function ProfileSettingsPage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/login?next=/settings/profile')
+    redirect('/login?next=/settings/loggu')
   }
 
   const { data: profile } = await supabase
