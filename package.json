@@ -1,17 +1,17 @@
 {
-  "name": "blog-platform",
+  "name": "loggu",
   "version": "0.1.0",
-  "description": "프로덕션 수준의 웹 기반 블로그 플랫폼",
+  "description": "글을 작성하고 공유하는 블로그 플랫폼",
   "author": "po4tion <po4tion0429@gmail.com>",
   "license": "MIT",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/po4tion/blog-platform.git"
+    "url": "https://github.com/po4tion/loggu.git"
   },
-  "homepage": "https://github.com/po4tion/blog-platform",
+  "homepage": "https://github.com/po4tion/loggu",
   "bugs": {
-    "url": "https://github.com/po4tion/blog-platform/issues"
+    "url": "https://github.com/po4tion/loggu/issues"
   },
   "keywords": [
     "blog",
