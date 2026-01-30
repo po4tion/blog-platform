@@ -45,7 +45,7 @@ export function UserMenu({ user, profile, className, showTitle = false }: UserMe
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className={`relative transition-all ${showTitle ? 'h-9 gap-2 rounded-lg px-2 hover:bg-accent' : 'h-9 w-9 rounded-full ring-2 ring-transparent hover:ring-border/50'} ${className || ''}`}
+          className={`relative transition-all ${showTitle ? 'h-9 gap-2 rounded-lg px-2 hover:opacity-80' : 'h-9 w-9 rounded-full ring-2 ring-transparent hover:ring-border/50'} ${className || ''}`}
         >
           <Avatar className="h-9 w-9">
             <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
