@@ -22,9 +22,14 @@ interface MobileNavProps {
     display_name: string | null
     avatar_url: string | null
   } | null
+  ownerProfile?: {
+    username: string
+    display_name: string | null
+    avatar_url: string | null
+  } | null
 }
 
-export function MobileNav({ user, profile }: MobileNavProps) {
+export function MobileNav({ user, profile, ownerProfile }: MobileNavProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
@@ -36,8 +41,9 @@ export function MobileNav({ user, profile }: MobileNavProps) {
     router.refresh()
   }
 
-  const displayName = profile?.display_name || profile?.username || ''
-  const avatarUrl = profile?.avatar_url
+  const displayProfile = profile || ownerProfile
+  const displayName = displayProfile?.display_name || displayProfile?.username || ''
+  const avatarUrl = displayProfile?.avatar_url
   const initials = displayName.slice(0, 2).toUpperCase()
 
   return (
@@ -67,31 +73,16 @@ export function MobileNav({ user, profile }: MobileNavProps) {
       <SheetContent side="left" className="w-72 p-0">
         <SheetHeader className="border-b border-border/50 p-4">
           <SheetTitle className="flex items-center gap-2 text-left">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-            </div>
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
+              <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
+            </Avatar>
             <span className="font-semibold">Blog Platform</span>
           </SheetTitle>
         </SheetHeader>
 
         {user && profile && (
           <div className="flex items-center gap-3 border-b border-border/50 p-4">
-            <Avatar className="h-10 w-10 ring-2 ring-border/50 ring-offset-2 ring-offset-background">
-              <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
-              <AvatarFallback className="text-sm font-medium">{initials}</AvatarFallback>
-            </Avatar>
             <div className="flex flex-col">
               <span className="text-sm font-medium">{displayName}</span>
               <span className="text-xs text-muted-foreground">{user.email}</span>
