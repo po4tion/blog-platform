@@ -1,8 +1,8 @@
+import { ProfilePostList } from '@/components/profile/profile-post-list'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { createClient } from '@/lib/supabase/server'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ProfilePostList } from '@/components/profile/profile-post-list'
 
 interface ProfilePageProps {
   params: Promise<{ username: string }>
@@ -11,7 +11,7 @@ interface ProfilePageProps {
 export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
   const { username } = await params
   const supabase = await createClient()
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
 
   const displayName = profile.display_name || profile.username
   const description = profile.bio || `${displayName}의 블로그`
-  const canonicalUrl = `${siteUrl}/profile/${username}`
+  const canonicalUrl = `${siteUrl}/@${username}`
 
   return {
     title: `${displayName} (@${profile.username})`,
@@ -38,7 +38,9 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
       title: `${displayName} (@${profile.username})`,
       description,
       url: canonicalUrl,
-      images: profile.avatar_url ? [{ url: profile.avatar_url, alt: `${displayName}의 프로필 이미지` }] : undefined,
+      images: profile.avatar_url
+        ? [{ url: profile.avatar_url, alt: `${displayName}의 프로필 이미지` }]
+        : undefined,
       username: profile.username,
     },
     twitter: {
@@ -82,7 +84,9 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   // Fetch posts - 본인이면 모든 글, 아니면 발행된 글만
   let postsQuery = supabase
     .from('posts')
-    .select('id, title, slug, excerpt, cover_image_url, published, published_at, created_at, views, reading_time_minutes')
+    .select(
+      'id, title, slug, excerpt, cover_image_url, published, published_at, created_at, views, reading_time_minutes'
+    )
     .eq('author_id', profile.id)
     .order('created_at', { ascending: false })
 

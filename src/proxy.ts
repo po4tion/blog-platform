@@ -4,11 +4,11 @@ import { updateSession } from '@/lib/supabase/middleware'
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // /@username → /profile/username 리라이트
+  // /@username → /loggu/username 리라이트
   if (pathname.startsWith('/@')) {
     const username = pathname.slice(2)
     const url = request.nextUrl.clone()
-    url.pathname = `/profile/${username}`
+    url.pathname = `/loggu/${username}`
     return NextResponse.rewrite(url)
   }
 

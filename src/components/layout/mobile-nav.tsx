@@ -143,7 +143,7 @@ export function MobileNav({ user, profile, ownerProfile }: MobileNavProps) {
 
               <SheetClose asChild>
                 <Link
-                  href={`/profile/${profile.username}`}
+                  href={`/@${profile.username}` as never}
                   className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
                 >
                   <svg

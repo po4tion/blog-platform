@@ -1,15 +1,15 @@
-import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
-import type { CommentWithAuthor, Profile } from '@/types'
+import { CommentList } from '@/components/comment/comment-list'
+import { PostActions } from '@/components/post/post-actions'
+import { PostContent } from '@/components/post/post-content'
+import { TableOfContents } from '@/components/post/table-of-contents'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { PostContent } from '@/components/post/post-content'
-import { PostActions } from '@/components/post/post-actions'
-import { CommentList } from '@/components/comment/comment-list'
-import { TableOfContents } from '@/components/post/table-of-contents'
+import { createClient } from '@/lib/supabase/server'
+import type { CommentWithAuthor, Profile } from '@/types'
+import { Metadata } from 'next'
+import Image from 'next/image'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
 interface PostPageProps {
   params: Promise<{ slug: string }>
@@ -18,11 +18,12 @@ interface PostPageProps {
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
   const { slug } = await params
   const supabase = await createClient()
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL!
 
   const { data: post } = await supabase
     .from('posts')
-    .select(`
+    .select(
+      `
       title,
       excerpt,
       cover_image_url,
@@ -32,7 +33,8 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
         username,
         display_name
       )
-    `)
+    `
+    )
     .eq('slug', slug)
     .eq('published', true)
     .single()
@@ -53,7 +55,8 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   const authorName = author?.display_name || author?.username || 'Unknown'
   const description = post.excerpt || post.title
   const canonicalUrl = `${siteUrl}/posts/${slug}`
-  const keywords = postTags?.map((pt) => (pt.tags as unknown as { name: string })?.name).filter(Boolean) || []
+  const keywords =
+    postTags?.map((pt) => (pt.tags as unknown as { name: string })?.name).filter(Boolean) || []
 
   return {
     title: post.title,
@@ -183,8 +186,7 @@ export default async function PostPage({ params }: PostPageProps) {
     .select('tags(name, slug)')
     .eq('post_id', post.id)
 
-  const tags =
-    postTags?.map((pt) => pt.tags as unknown as { name: string; slug: string }) || []
+  const tags = postTags?.map((pt) => pt.tags as unknown as { name: string; slug: string }) || []
 
   const author = post.profiles as unknown as {
     id: string
@@ -205,7 +207,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
   return (
     <main className="container mx-auto px-6 py-8 md:py-10">
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_200px] gap-8 max-w-6xl mx-auto">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 xl:grid-cols-[1fr_200px]">
         <article className="max-w-4xl">
           <header className="mb-8">
             {!post.published && (
@@ -213,14 +215,16 @@ export default async function PostPage({ params }: PostPageProps) {
                 임시저장
               </span>
             )}
-            <h1 className="text-2xl md:text-4xl leading-tight font-bold text-heading">{post.title}</h1>
+            <h1 className="text-heading text-2xl leading-tight font-bold md:text-4xl">
+              {post.title}
+            </h1>
             {post.excerpt && (
-              <p className="mt-3 text-subtle text-base md:text-lg">{post.excerpt}</p>
+              <p className="text-subtle mt-3 text-base md:text-lg">{post.excerpt}</p>
             )}
 
             <div className="mt-6 flex items-center justify-between">
               <Link
-                href={`/profile/${author.username}`}
+                href={`/@${author.username}` as never}
                 className="flex items-center gap-3 hover:opacity-80"
               >
                 <Avatar>
@@ -228,12 +232,10 @@ export default async function PostPage({ params }: PostPageProps) {
                   <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium text-heading">{displayName}</p>
+                  <p className="text-heading font-medium">{displayName}</p>
                   <p className="text-muted-foreground text-sm">
                     {publishedDate && <span>{publishedDate}</span>}
-                    {post.reading_time_minutes && (
-                      <span> · {post.reading_time_minutes}분</span>
-                    )}
+                    {post.reading_time_minutes && <span> · {post.reading_time_minutes}분</span>}
                     {post.views > 0 && <span> · 조회 {post.views}</span>}
                   </p>
                 </div>
@@ -257,10 +259,14 @@ export default async function PostPage({ params }: PostPageProps) {
 
           {tags.length > 0 && (
             <div className="mb-8">
-              <p className="text-xs text-subtle uppercase tracking-wide mb-3">Tags</p>
+              <p className="text-subtle mb-3 text-xs tracking-wide uppercase">Tags</p>
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  <Badge key={tag.slug} variant="outline" className="py-[4px] px-[12px] text-[14px] text-subtle">
+                  <Badge
+                    key={tag.slug}
+                    variant="outline"
+                    className="text-subtle px-[12px] py-[4px] text-[14px]"
+                  >
                     #{tag.name}
                   </Badge>
                 ))}

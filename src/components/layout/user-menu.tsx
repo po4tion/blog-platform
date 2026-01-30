@@ -70,7 +70,7 @@ export function UserMenu({ user, profile, className, showTitle = false }: UserMe
           asChild
           className="cursor-pointer rounded-md px-2 py-2 transition-colors"
         >
-          <Link href={`/profile/${profile.username}`} className="flex items-center gap-2">
+          <Link href={`/@${profile.username}` as never} className="flex items-center gap-2">
             <svg
               className="h-4 w-4 text-muted-foreground"
               fill="none"

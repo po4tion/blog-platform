@@ -1,7 +1,7 @@
+import { QueryProvider } from '@/components/providers/query-provider'
+import { ThemeProvider } from '@/components/theme/theme-provider'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { ThemeProvider } from '@/components/theme/theme-provider'
-import { QueryProvider } from '@/components/providers/query-provider'
 import './globals.css'
 
 const geistSans = Geist({
@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL!
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
