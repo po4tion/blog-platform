@@ -58,7 +58,7 @@ export function TiptapEditor({
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-primary underline',
+          class: 'text-primary underline cursor-pointer',
         },
       }),
       Youtube.configure({
@@ -85,6 +85,15 @@ export function TiptapEditor({
     editorProps: {
       attributes: {
         class: 'prose prose-neutral dark:prose-invert max-w-none min-h-[300px] focus:outline-none',
+      },
+      handleClick: (_view, _pos, event) => {
+        // Prevent link navigation in editor
+        const target = event.target as HTMLElement
+        if (target.tagName === 'A' || target.closest('a')) {
+          event.preventDefault()
+          return true
+        }
+        return false
       },
       handleDrop: (view, event, _slice, moved) => {
         if (!moved && event.dataTransfer?.files?.length) {
