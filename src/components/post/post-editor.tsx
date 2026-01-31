@@ -2,12 +2,7 @@
 
 import { TiptapEditor } from '@/components/editor/tiptap-editor'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { createClient } from '@/lib/supabase/client'
 import { postSchema, type PostFormData } from '@/lib/validations/post'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -194,17 +189,60 @@ export function PostEditor({ authorId }: PostEditorProps) {
 
       {/* 에디터 영역 */}
       <main className="mx-auto max-w-3xl px-4 py-12">
-        {/* Add Cover 버튼 */}
+        {/* Add Cover 버튼 + Popover */}
         {!coverImage && (
           <div className="mb-8">
-            <button
-              type="button"
-              onClick={() => setShowCoverUpload(true)}
-              className="border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors"
-            >
-              <ImageIcon className="h-4 w-4" />
-              Add Cover
-            </button>
+            <Popover open={showCoverUpload} onOpenChange={setShowCoverUpload}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                  Add Cover
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-[500px] p-0" sideOffset={8}>
+                <div className="flex items-center justify-between border-b px-4 py-3">
+                  <span className="text-sm font-medium">Upload</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowCoverUpload(false)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                <div className="p-4">
+                  <div
+                    className="border-border hover:border-muted-foreground flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed py-10 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <button
+                      type="button"
+                      className="border-border bg-background hover:bg-muted inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm transition-colors"
+                      disabled={isUploading}
+                    >
+                      <Upload className="h-4 w-4" />
+                      {isUploading ? 'Uploading...' : 'Upload Image'}
+                    </button>
+                    <p className="text-muted-foreground mt-3 text-sm">
+                      Recommended dimension is 1600 × 840
+                    </p>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0]
+                      if (file) handleCoverUpload(file)
+                    }}
+                  />
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         )}
 
@@ -247,45 +285,6 @@ export function PostEditor({ authorId }: PostEditorProps) {
           />
         </div>
       </main>
-
-      {/* 커버 업로드 모달 */}
-      <Dialog open={showCoverUpload} onOpenChange={setShowCoverUpload}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-4">
-              <span className="border-b-2 border-blue-600 pb-1">Upload</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="pt-4">
-            <div
-              className="border-border hover:border-muted-foreground flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed py-12 transition-colors"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <button
-                type="button"
-                className="border-border bg-background hover:bg-muted inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm transition-colors"
-                disabled={isUploading}
-              >
-                <Upload className="h-4 w-4" />
-                {isUploading ? 'Uploading...' : 'Upload Image'}
-              </button>
-              <p className="text-muted-foreground mt-3 text-sm">
-                Recommended dimension is 1600 × 840
-              </p>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) handleCoverUpload(file)
-              }}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
