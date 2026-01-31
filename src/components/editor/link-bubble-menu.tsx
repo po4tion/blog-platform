@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Pencil, Unlink } from 'lucide-react'
+import { ExternalLink, Pencil, Unlink } from 'lucide-react'
 import type { Editor } from '@tiptap/core'
 
 interface LinkBubbleMenuProps {
@@ -12,22 +12,26 @@ interface LinkBubbleMenuProps {
 export function LinkBubbleMenu({ editor, onEditLink }: LinkBubbleMenuProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [position, setPosition] = useState({ top: 0, left: 0 })
+  const [linkUrl, setLinkUrl] = useState('')
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const updateMenu = () => {
-      const { from, to } = editor.state.selection
       const isLink = editor.isActive('link')
 
-      if (isLink && from !== to) {
+      if (isLink) {
+        const { from } = editor.state.selection
         const coords = editor.view.coordsAtPos(from)
+        const linkAttrs = editor.getAttributes('link')
         setPosition({
           top: coords.top - 45,
           left: coords.left,
         })
+        setLinkUrl(linkAttrs.href || '')
         setIsVisible(true)
       } else {
         setIsVisible(false)
+        setLinkUrl('')
       }
     }
 
@@ -50,6 +54,12 @@ export function LinkBubbleMenu({ editor, onEditLink }: LinkBubbleMenuProps) {
     setIsVisible(false)
   }
 
+  const handleOpenLink = () => {
+    if (linkUrl && linkUrl !== '#') {
+      window.open(linkUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
+
   if (!isVisible) return null
 
   return (
@@ -61,6 +71,15 @@ export function LinkBubbleMenu({ editor, onEditLink }: LinkBubbleMenuProps) {
         left: position.left,
       }}
     >
+      <button
+        type="button"
+        onClick={handleOpenLink}
+        className="rounded p-2 text-neutral-600 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-700"
+        title="Open link"
+        disabled={!linkUrl || linkUrl === '#'}
+      >
+        <ExternalLink className="h-4 w-4" />
+      </button>
       <button
         type="button"
         onClick={handleEditLink}

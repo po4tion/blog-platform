@@ -66,13 +66,55 @@ export function LinkPopover({ editor, isOpen, onClose, position }: LinkPopoverPr
 
     const { from, to } = editor.state.selection
     const hasSelection = from !== to
+    const isEditingLink = editor.isActive('link')
 
-    if (hasSelection) {
-      editor.chain().focus().setLink({ href: url }).run()
+    // Helper to remove stored link mark (prevents link from continuing to new text)
+    const removeStoredLinkMark = () => {
+      const { tr } = editor.state
+      tr.removeStoredMark(editor.schema.marks.link)
+      editor.view.dispatch(tr)
+    }
+
+    if (isEditingLink) {
+      // Find the link mark range and replace it completely
+      const { $from } = editor.state.selection
+      let linkStart = from
+      let linkEnd = to
+
+      // Find link boundaries
+      const linkMark = editor.schema.marks.link
+      editor.state.doc.nodesBetween($from.start(), $from.end(), (node, pos) => {
+        if (node.isText && node.marks.some((m) => m.type === linkMark)) {
+          const nodeStart = pos
+          const nodeEnd = pos + node.nodeSize
+          if (from >= nodeStart && from <= nodeEnd) {
+            linkStart = nodeStart
+            linkEnd = nodeEnd
+          }
+        }
+      })
+
+      // Delete old link and insert new one
+      editor
+        .chain()
+        .focus()
+        .setTextSelection({ from: linkStart, to: linkEnd })
+        .deleteSelection()
+        .insertContent(`<a href="${url}">${anchorText || url}</a>`)
+        .run()
+      removeStoredLinkMark()
+    } else if (hasSelection) {
+      // Wrap selected text with link
+      editor.chain().focus().setLink({ href: url }).setTextSelection(to).run()
+      removeStoredLinkMark()
     } else if (anchorText) {
+      // Insert new link with anchor text
       editor.chain().focus().insertContent(`<a href="${url}">${anchorText}</a>`).run()
+      removeStoredLinkMark()
     } else {
+      // Insert URL as link
       editor.chain().focus().insertContent(`<a href="${url}">${url}</a>`).run()
+      removeStoredLinkMark()
     }
 
     onClose()
