@@ -14,6 +14,7 @@ import {
   useImperativeHandle,
   useState,
   useCallback,
+  useRef,
 } from 'react'
 import {
   Type,
@@ -163,6 +164,7 @@ interface CommandListRef {
 const CommandList = forwardRef<CommandListRef, CommandListProps>(
   ({ items, command }, ref) => {
     const [selectedIndex, setSelectedIndex] = useState(0)
+    const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
 
     const selectItem = useCallback(
       (index: number) => {
@@ -177,6 +179,13 @@ const CommandList = forwardRef<CommandListRef, CommandListProps>(
     useEffect(() => {
       setSelectedIndex(0)
     }, [items])
+
+    useEffect(() => {
+      const selectedElement = itemRefs.current[selectedIndex]
+      if (selectedElement) {
+        selectedElement.scrollIntoView({ block: 'nearest' })
+      }
+    }, [selectedIndex])
 
     useImperativeHandle(ref, () => ({
       onKeyDown: ({ event }: { event: KeyboardEvent }) => {
@@ -215,6 +224,9 @@ const CommandList = forwardRef<CommandListRef, CommandListProps>(
         {items.map((item, index) => (
           <button
             key={item.title}
+            ref={(el) => {
+              itemRefs.current[index] = el
+            }}
             type="button"
             onClick={() => selectItem(index)}
             className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
