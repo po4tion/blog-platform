@@ -13,6 +13,7 @@ import { CodeBlockComponent } from './code-block-component'
 import { LinkPopover } from './link-popover'
 import { LinkBubbleMenu } from './link-bubble-menu'
 import { ImagePopover } from './image-popover'
+import { ImageBubbleMenu } from './image-bubble-menu'
 import { useState, useEffect } from 'react'
 
 // lowlight 인스턴스 생성 (all languages 포함)
@@ -38,6 +39,7 @@ export function TiptapEditor({
   const [imagePopoverOpen, setImagePopoverOpen] = useState(false)
   const [imagePopoverPosition, setImagePopoverPosition] = useState<{ top: number; left: number } | null>(null)
   const [imagePopoverKey, setImagePopoverKey] = useState(0)
+  const [isReplacingImage, setIsReplacingImage] = useState(false)
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -55,9 +57,51 @@ export function TiptapEditor({
       }).configure({
         lowlight,
       }),
-      Image.configure({
-        HTMLAttributes: {
-          class: 'rounded-lg max-w-full',
+      Image.extend({
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            style: {
+              default: null,
+              parseHTML: (element) => element.getAttribute('style'),
+              renderHTML: (attributes) => {
+                if (!attributes.style) {
+                  return {}
+                }
+                return { style: attributes.style }
+              },
+            },
+            link: {
+              default: null,
+              parseHTML: (element) => {
+                const parent = element.parentElement
+                if (parent?.tagName === 'A') {
+                  return parent.getAttribute('href')
+                }
+                return null
+              },
+              renderHTML: () => {
+                return {}
+              },
+            },
+          }
+        },
+        renderHTML({ HTMLAttributes, node }) {
+          const { link, ...attrs } = HTMLAttributes
+          const imgAttrs = {
+            ...attrs,
+            class: 'rounded-lg max-w-full',
+          }
+
+          if (node.attrs.link) {
+            return [
+              'a',
+              { href: node.attrs.link, target: '_blank', rel: 'noopener noreferrer' },
+              ['img', imgAttrs],
+            ]
+          }
+
+          return ['img', imgAttrs]
         },
       }),
       Link.configure({
@@ -210,6 +254,30 @@ export function TiptapEditor({
     setLinkPopoverOpen(true)
   }
 
+  const openImagePopoverForReplace = () => {
+    if (!editor) return
+
+    setIsReplacingImage(true)
+
+    const { selection } = editor.state
+    const dom = editor.view.nodeDOM(selection.from) as HTMLElement | null
+
+    if (dom) {
+      const rect = dom.getBoundingClientRect()
+      setImagePopoverPosition({
+        top: rect.bottom + 8,
+        left: rect.left,
+      })
+      setImagePopoverKey((prev) => prev + 1)
+      setImagePopoverOpen(true)
+    }
+  }
+
+  const handleImagePopoverClose = () => {
+    setImagePopoverOpen(false)
+    setIsReplacingImage(false)
+  }
+
   if (!editor) {
     return null
   }
@@ -219,6 +287,7 @@ export function TiptapEditor({
       <>
         <EditorContent editor={editor} />
         <LinkBubbleMenu editor={editor} onEditLink={openLinkPopoverForEdit} />
+        <ImageBubbleMenu editor={editor} onChangeImage={openImagePopoverForReplace} />
         <LinkPopover
           key={`link-${linkPopoverKey}`}
           editor={editor}
@@ -230,8 +299,9 @@ export function TiptapEditor({
           key={`image-${imagePopoverKey}`}
           editor={editor}
           isOpen={imagePopoverOpen}
-          onClose={() => setImagePopoverOpen(false)}
+          onClose={handleImagePopoverClose}
           position={imagePopoverPosition}
+          isReplacing={isReplacingImage}
         />
       </>
     )
@@ -246,6 +316,7 @@ export function TiptapEditor({
         </div>
       </div>
       <LinkBubbleMenu editor={editor} onEditLink={openLinkPopoverForEdit} />
+      <ImageBubbleMenu editor={editor} onChangeImage={openImagePopoverForReplace} />
       <LinkPopover
         key={`link-${linkPopoverKey}`}
         editor={editor}
@@ -257,8 +328,9 @@ export function TiptapEditor({
         key={`image-${imagePopoverKey}`}
         editor={editor}
         isOpen={imagePopoverOpen}
-        onClose={() => setImagePopoverOpen(false)}
+        onClose={handleImagePopoverClose}
         position={imagePopoverPosition}
+        isReplacing={isReplacingImage}
       />
     </>
   )

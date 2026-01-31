@@ -9,11 +9,12 @@ interface ImagePopoverProps {
   isOpen: boolean
   onClose: () => void
   position: { top: number; left: number } | null
+  isReplacing?: boolean
 }
 
 type TabType = 'upload' | 'url'
 
-export function ImagePopover({ editor, isOpen, onClose, position }: ImagePopoverProps) {
+export function ImagePopover({ editor, isOpen, onClose, position, isReplacing = false }: ImagePopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null)
   const urlInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -57,7 +58,13 @@ export function ImagePopover({ editor, isOpen, onClose, position }: ImagePopover
 
   const insertImage = (src: string) => {
     if (!src) return
-    editor.chain().focus().setImage({ src }).run()
+
+    if (isReplacing) {
+      // Delete current image and insert new one
+      editor.chain().focus().deleteSelection().setImage({ src }).run()
+    } else {
+      editor.chain().focus().setImage({ src }).run()
+    }
     resetAndClose()
   }
 
