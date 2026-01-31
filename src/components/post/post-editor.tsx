@@ -32,6 +32,7 @@ export function PostEditor({ authorId }: PostEditorProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [showCoverUpload, setShowCoverUpload] = useState(false)
   const [coverImage, setCoverImage] = useState<string | null>(null)
+  const [coverImagePath, setCoverImagePath] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -67,13 +68,19 @@ export function PostEditor({ authorId }: PostEditorProps) {
     const { data: urlData } = supabase.storage.from('covers').getPublicUrl(data.path)
 
     setCoverImage(urlData.publicUrl)
+    setCoverImagePath(data.path)
     setValue('cover_image_url', urlData.publicUrl)
     setShowCoverUpload(false)
     setIsUploading(false)
   }
 
-  const handleRemoveCover = () => {
+  const handleRemoveCover = async () => {
+    if (coverImagePath) {
+      const supabase = createClient()
+      await supabase.storage.from('covers').remove([coverImagePath])
+    }
     setCoverImage(null)
+    setCoverImagePath(null)
     setValue('cover_image_url', '')
   }
 
