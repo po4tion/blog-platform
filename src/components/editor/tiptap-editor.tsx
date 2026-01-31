@@ -61,7 +61,13 @@ export function TiptapEditor({
         height: 360,
       }),
       Placeholder.configure({
-        placeholder,
+        placeholder: ({ node }) => {
+          if (node.type.name === 'heading') {
+            const level = node.attrs.level as number
+            return `Heading ${level}`
+          }
+          return placeholder
+        },
       }),
       SlashCommand,
     ],
