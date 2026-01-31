@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { ImageIcon, X, Upload, Link } from 'lucide-react'
+import { ImageIcon, X, Upload, Loader2 } from 'lucide-react'
 import type { Editor } from '@tiptap/core'
+import { uploadContentImage } from '@/lib/storage/upload-image'
 
 interface ImagePopoverProps {
   editor: Editor
@@ -10,27 +11,16 @@ interface ImagePopoverProps {
   onClose: () => void
   position: { top: number; left: number } | null
   isReplacing?: boolean
+  authorId?: string
 }
 
-type TabType = 'upload' | 'url'
-
-export function ImagePopover({ editor, isOpen, onClose, position, isReplacing = false }: ImagePopoverProps) {
+export function ImagePopover({ editor, isOpen, onClose, position, isReplacing = false, authorId }: ImagePopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null)
-  const urlInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [activeTab, setActiveTab] = useState<TabType>('upload')
-  const [imageUrl, setImageUrl] = useState('')
   const [isDragging, setIsDragging] = useState(false)
-
-  // Focus URL input when switching to URL tab
-  useEffect(() => {
-    if (isOpen && activeTab === 'url') {
-      setTimeout(() => {
-        urlInputRef.current?.focus()
-      }, 100)
-    }
-  }, [isOpen, activeTab])
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -69,30 +59,41 @@ export function ImagePopover({ editor, isOpen, onClose, position, isReplacing = 
   }
 
   const resetAndClose = () => {
-    setImageUrl('')
-    setActiveTab('upload')
+    setUploadError(null)
+    setIsUploading(false)
     onClose()
   }
 
-  const handleUrlSubmit = () => {
-    insertImage(imageUrl)
-  }
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleUrlSubmit()
-    }
-  }
-
-  const handleFileSelect = (file: File) => {
+  const handleFileSelect = async (file: File) => {
     if (!file.type.startsWith('image/')) return
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      insertImage(reader.result as string)
+    setUploadError(null)
+
+    // If no authorId provided, fall back to base64 (for backward compatibility)
+    if (!authorId) {
+      const reader = new FileReader()
+      reader.onload = () => {
+        insertImage(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+      return
     }
-    reader.readAsDataURL(file)
+
+    // Upload to Supabase Storage
+    setIsUploading(true)
+
+    const { data, error } = await uploadContentImage(file, authorId)
+
+    setIsUploading(false)
+
+    if (error) {
+      setUploadError(error.message)
+      return
+    }
+
+    if (data) {
+      insertImage(data.url)
+    }
   }
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,83 +149,47 @@ export function ImagePopover({ editor, isOpen, onClose, position, isReplacing = 
         </button>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b">
-        <button
-          type="button"
-          onClick={() => setActiveTab('upload')}
-          className={`flex flex-1 items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-            activeTab === 'upload'
-              ? 'border-b-2 border-blue-600 text-blue-600'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Upload className="h-4 w-4" />
-          Upload
-        </button>
-        <button
-          type="button"
-          onClick={() => setActiveTab('url')}
-          className={`flex flex-1 items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-            activeTab === 'url'
-              ? 'border-b-2 border-blue-600 text-blue-600'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          <Link className="h-4 w-4" />
-          Embed link
-        </button>
-      </div>
-
       {/* Content */}
       <div className="p-4">
-        {activeTab === 'upload' ? (
+        <div className="space-y-3">
           <div
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => !isUploading && fileInputRef.current?.click()}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${
-              isDragging
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
-                : 'border-neutral-300 hover:border-neutral-400 dark:border-neutral-600 dark:hover:border-neutral-500'
+            onDrop={(e) => !isUploading && handleDrop(e)}
+            className={`flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${
+              isUploading
+                ? 'cursor-not-allowed border-neutral-300 bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800'
+                : isDragging
+                  ? 'cursor-pointer border-blue-500 bg-blue-50 dark:bg-blue-950'
+                  : 'cursor-pointer border-neutral-300 hover:border-neutral-400 dark:border-neutral-600 dark:hover:border-neutral-500'
             }`}
           >
-            <Upload className="text-muted-foreground mb-3 h-8 w-8" />
-            <p className="text-sm font-medium">Click to upload or drag and drop</p>
-            <p className="text-muted-foreground mt-1 text-xs">PNG, JPG, GIF up to 10MB</p>
+            {isUploading ? (
+              <>
+                <Loader2 className="text-muted-foreground mb-3 h-8 w-8 animate-spin" />
+                <p className="text-sm font-medium">Uploading...</p>
+              </>
+            ) : (
+              <>
+                <Upload className="text-muted-foreground mb-3 h-8 w-8" />
+                <p className="text-sm font-medium">Click to upload or drag and drop</p>
+                <p className="text-muted-foreground mt-1 text-xs">PNG, JPG, GIF, WebP up to 10MB</p>
+              </>
+            )}
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/gif,image/webp"
               onChange={handleFileInputChange}
               className="hidden"
+              disabled={isUploading}
             />
           </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Image URL</label>
-              <input
-                ref={urlInputRef}
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                placeholder="https://..."
-                className="border-input bg-background w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                onKeyDown={handleKeyDown}
-              />
-            </div>
-            <button
-              type="button"
-              onClick={handleUrlSubmit}
-              disabled={!imageUrl}
-              className="w-full rounded-full bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              Add image
-            </button>
-          </div>
-        )}
+          {uploadError && (
+            <p className="text-sm text-red-500">{uploadError}</p>
+          )}
+        </div>
       </div>
     </div>
   )

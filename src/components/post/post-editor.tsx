@@ -326,6 +326,7 @@ export function PostEditor({ authorId }: PostEditorProps) {
                 onChange={field.onChange}
                 placeholder="Type '/' for commands..."
                 minimal
+                authorId={authorId}
               />
             )}
           />

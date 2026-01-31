@@ -14,6 +14,7 @@ import { LinkPopover } from './link-popover'
 import { LinkBubbleMenu } from './link-bubble-menu'
 import { ImagePopover } from './image-popover'
 import { ImageBubbleMenu } from './image-bubble-menu'
+import { uploadContentImage } from '@/lib/storage/upload-image'
 import { useState, useEffect } from 'react'
 
 // lowlight 인스턴스 생성 (all languages 포함)
@@ -24,6 +25,7 @@ interface TiptapEditorProps {
   onChange: (content: string) => void
   placeholder?: string
   minimal?: boolean
+  authorId?: string
 }
 
 export function TiptapEditor({
@@ -31,6 +33,7 @@ export function TiptapEditor({
   onChange,
   placeholder = '내용을 입력하세요...',
   minimal = false,
+  authorId,
 }: TiptapEditorProps) {
   const [linkPopoverOpen, setLinkPopoverOpen] = useState(false)
   const [linkPopoverPosition, setLinkPopoverPosition] = useState<{ top: number; left: number } | null>(null)
@@ -149,17 +152,35 @@ export function TiptapEditor({
           const file = event.dataTransfer.files[0]
           if (file.type.startsWith('image/')) {
             event.preventDefault()
-            const reader = new FileReader()
-            reader.onload = () => {
-              const { schema } = view.state
-              const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
-              const node = schema.nodes.image.create({ src: reader.result as string })
-              if (coordinates) {
-                const transaction = view.state.tr.insert(coordinates.pos, node)
-                view.dispatch(transaction)
+            const coordinates = view.posAtCoords({ left: event.clientX, top: event.clientY })
+
+            if (authorId) {
+              // Upload to Supabase Storage
+              uploadContentImage(file, authorId).then(({ data, error }) => {
+                if (error || !data) {
+                  console.error('Image upload failed:', error?.message)
+                  return
+                }
+                const { schema } = view.state
+                const node = schema.nodes.image.create({ src: data.url })
+                if (coordinates) {
+                  const transaction = view.state.tr.insert(coordinates.pos, node)
+                  view.dispatch(transaction)
+                }
+              })
+            } else {
+              // Fallback to base64
+              const reader = new FileReader()
+              reader.onload = () => {
+                const { schema } = view.state
+                const node = schema.nodes.image.create({ src: reader.result as string })
+                if (coordinates) {
+                  const transaction = view.state.tr.insert(coordinates.pos, node)
+                  view.dispatch(transaction)
+                }
               }
+              reader.readAsDataURL(file)
             }
-            reader.readAsDataURL(file)
             return true
           }
         }
@@ -173,14 +194,29 @@ export function TiptapEditor({
               event.preventDefault()
               const file = item.getAsFile()
               if (file) {
-                const reader = new FileReader()
-                reader.onload = () => {
-                  const { schema } = view.state
-                  const node = schema.nodes.image.create({ src: reader.result as string })
-                  const transaction = view.state.tr.replaceSelectionWith(node)
-                  view.dispatch(transaction)
+                if (authorId) {
+                  // Upload to Supabase Storage
+                  uploadContentImage(file, authorId).then(({ data, error }) => {
+                    if (error || !data) {
+                      console.error('Image upload failed:', error?.message)
+                      return
+                    }
+                    const { schema } = view.state
+                    const node = schema.nodes.image.create({ src: data.url })
+                    const transaction = view.state.tr.replaceSelectionWith(node)
+                    view.dispatch(transaction)
+                  })
+                } else {
+                  // Fallback to base64
+                  const reader = new FileReader()
+                  reader.onload = () => {
+                    const { schema } = view.state
+                    const node = schema.nodes.image.create({ src: reader.result as string })
+                    const transaction = view.state.tr.replaceSelectionWith(node)
+                    view.dispatch(transaction)
+                  }
+                  reader.readAsDataURL(file)
                 }
-                reader.readAsDataURL(file)
               }
               return true
             }
@@ -302,6 +338,7 @@ export function TiptapEditor({
           onClose={handleImagePopoverClose}
           position={imagePopoverPosition}
           isReplacing={isReplacingImage}
+          authorId={authorId}
         />
       </>
     )
@@ -331,6 +368,7 @@ export function TiptapEditor({
         onClose={handleImagePopoverClose}
         position={imagePopoverPosition}
         isReplacing={isReplacingImage}
+        authorId={authorId}
       />
     </>
   )

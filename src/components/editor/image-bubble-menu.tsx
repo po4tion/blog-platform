@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import type { Editor } from '@tiptap/core'
 import { NodeSelection } from '@tiptap/pm/state'
+import { deleteContentImage } from '@/lib/storage/upload-image'
 
 interface ImageBubbleMenuProps {
   editor: Editor
@@ -161,7 +162,19 @@ export function ImageBubbleMenu({ editor, onChangeImage }: ImageBubbleMenuProps)
     setShowLinkInput(false)
   }
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    // Get the image src before deleting
+    const { selection } = editor.state
+    if (selection instanceof NodeSelection && selection.node) {
+      const src = selection.node.attrs.src as string
+      if (src) {
+        // Delete from storage (async, don't wait)
+        deleteContentImage(src).catch((err) => {
+          console.error('Failed to delete image from storage:', err)
+        })
+      }
+    }
+
     editor.chain().focus().deleteSelection().run()
     setIsVisible(false)
   }
