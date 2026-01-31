@@ -16,12 +16,14 @@ interface TiptapEditorProps {
   content: string
   onChange: (content: string) => void
   placeholder?: string
+  minimal?: boolean
 }
 
 export function TiptapEditor({
   content,
   onChange,
   placeholder = '내용을 입력하세요...',
+  minimal = false,
 }: TiptapEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
@@ -118,6 +120,10 @@ export function TiptapEditor({
 
   if (!editor) {
     return null
+  }
+
+  if (minimal) {
+    return <EditorContent editor={editor} />
   }
 
   return (
