@@ -32,6 +32,7 @@ export function TiptapEditor({
 }: TiptapEditorProps) {
   const [linkPopoverOpen, setLinkPopoverOpen] = useState(false)
   const [linkPopoverPosition, setLinkPopoverPosition] = useState<{ top: number; left: number } | null>(null)
+  const [linkPopoverKey, setLinkPopoverKey] = useState(0)
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -148,6 +149,7 @@ export function TiptapEditor({
         top: coords.bottom + 8,
         left: coords.left,
       })
+      setLinkPopoverKey((prev) => prev + 1)
       setLinkPopoverOpen(true)
     }
 
@@ -167,6 +169,7 @@ export function TiptapEditor({
       top: coords.bottom + 8,
       left: coords.left,
     })
+    setLinkPopoverKey((prev) => prev + 1)
     setLinkPopoverOpen(true)
   }
 
@@ -180,6 +183,7 @@ export function TiptapEditor({
         <EditorContent editor={editor} />
         <LinkBubbleMenu editor={editor} onEditLink={openLinkPopoverForEdit} />
         <LinkPopover
+          key={linkPopoverKey}
           editor={editor}
           isOpen={linkPopoverOpen}
           onClose={() => setLinkPopoverOpen(false)}
@@ -199,6 +203,7 @@ export function TiptapEditor({
       </div>
       <LinkBubbleMenu editor={editor} onEditLink={openLinkPopoverForEdit} />
       <LinkPopover
+        key={linkPopoverKey}
         editor={editor}
         isOpen={linkPopoverOpen}
         onClose={() => setLinkPopoverOpen(false)}

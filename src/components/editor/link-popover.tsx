@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { Link, X } from 'lucide-react'
 import type { Editor } from '@tiptap/core'
 
@@ -15,32 +15,22 @@ export function LinkPopover({ editor, isOpen, onClose, position }: LinkPopoverPr
   const popoverRef = useRef<HTMLDivElement>(null)
   const urlInputRef = useRef<HTMLInputElement>(null)
 
-  // Compute initial values when popover opens
-  const getInitialValues = () => {
+  // Compute initial values from editor state
+  const initialValues = useMemo(() => {
     if (!isOpen) return { anchorText: '', url: '' }
     const { from, to } = editor.state.selection
     const selectedText = editor.state.doc.textBetween(from, to, '')
     const linkMark = editor.getAttributes('link')
     const existingUrl = linkMark.href && linkMark.href !== '#' ? linkMark.href : ''
     return { anchorText: selectedText || '', url: existingUrl }
-  }
+  }, [isOpen, editor])
 
-  const initialValues = getInitialValues()
   const [anchorText, setAnchorText] = useState(initialValues.anchorText)
   const [url, setUrl] = useState(initialValues.url)
 
-  // Reset values when popover opens
-  const prevIsOpenRef = useRef(isOpen)
-  if (isOpen && !prevIsOpenRef.current) {
-    const values = getInitialValues()
-    if (values.anchorText !== anchorText) setAnchorText(values.anchorText)
-    if (values.url !== url) setUrl(values.url)
-  }
-  prevIsOpenRef.current = isOpen
-
+  // Focus URL input when popover opens
   useEffect(() => {
     if (isOpen) {
-      // Focus URL input after a short delay
       setTimeout(() => {
         urlInputRef.current?.focus()
       }, 100)
@@ -78,26 +68,11 @@ export function LinkPopover({ editor, isOpen, onClose, position }: LinkPopoverPr
     const hasSelection = from !== to
 
     if (hasSelection) {
-      // If there's selected text, wrap it with link
-      editor
-        .chain()
-        .focus()
-        .setLink({ href: url })
-        .run()
+      editor.chain().focus().setLink({ href: url }).run()
     } else if (anchorText) {
-      // If no selection but anchor text provided, insert new link
-      editor
-        .chain()
-        .focus()
-        .insertContent(`<a href="${url}">${anchorText}</a>`)
-        .run()
+      editor.chain().focus().insertContent(`<a href="${url}">${anchorText}</a>`).run()
     } else {
-      // Just insert the URL as both text and link
-      editor
-        .chain()
-        .focus()
-        .insertContent(`<a href="${url}">${url}</a>`)
-        .run()
+      editor.chain().focus().insertContent(`<a href="${url}">${url}</a>`).run()
     }
 
     onClose()

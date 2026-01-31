@@ -167,6 +167,9 @@ const CommandList = forwardRef<CommandListRef, CommandListProps>(
     const [selectedIndex, setSelectedIndex] = useState(0)
     const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
 
+    // Clamp selectedIndex to valid range when items change
+    const safeSelectedIndex = items.length > 0 ? selectedIndex % items.length : 0
+
     const selectItem = useCallback(
       (index: number) => {
         const item = items[index]
@@ -177,21 +180,13 @@ const CommandList = forwardRef<CommandListRef, CommandListProps>(
       [items, command]
     )
 
-    // Reset selected index when items change
-    const prevItemsRef = useRef(items)
-    if (prevItemsRef.current !== items) {
-      prevItemsRef.current = items
-      if (selectedIndex !== 0) {
-        setSelectedIndex(0)
-      }
-    }
-
+    // Scroll to selected item
     useEffect(() => {
-      const selectedElement = itemRefs.current[selectedIndex]
+      const selectedElement = itemRefs.current[safeSelectedIndex]
       if (selectedElement) {
         selectedElement.scrollIntoView({ block: 'nearest' })
       }
-    }, [selectedIndex])
+    }, [safeSelectedIndex])
 
     useImperativeHandle(ref, () => ({
       onKeyDown: ({ event }: { event: KeyboardEvent }) => {
@@ -206,7 +201,7 @@ const CommandList = forwardRef<CommandListRef, CommandListProps>(
         }
 
         if (event.key === 'Enter') {
-          selectItem(selectedIndex)
+          selectItem(safeSelectedIndex)
           return true
         }
 
@@ -236,7 +231,7 @@ const CommandList = forwardRef<CommandListRef, CommandListProps>(
             type="button"
             onClick={() => selectItem(index)}
             className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
-              index === selectedIndex ? 'bg-accent' : 'hover:bg-accent/50'
+              index === safeSelectedIndex ? 'bg-accent' : 'hover:bg-accent/50'
             }`}
           >
             <span className="text-muted-foreground">{item.icon}</span>
